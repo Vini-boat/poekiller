@@ -10,26 +10,9 @@ constexpr struct {
 } Screen;
 
 struct Ball {
-    Vector2 pos;
-    Vector2 velocity;
+    float posX,posY;
+    float velX,velY;
     float radius;
-
-    void draw(){
-        DrawCircleV(pos,radius,RED);
-    }
-    void update(float dt) {
-        pos = Vector2Add(
-            pos,
-            Vector2Scale(velocity, dt)
-        );
-    }
-    friend std::ostream& operator<<(std::ostream& os, const Ball& b){
-        os << "Ball:" << " x: " << b.pos.x << " y: " << b.pos.y  << "\n";
-        os << "    : vx: " << b.velocity.x << " vy: " << b.velocity.y << "\n";
-        os << "    : r: " << b.radius << "\n";
-        return os;
-    }
-
 };
 
 int main(void){
@@ -39,26 +22,56 @@ int main(void){
     SetTargetFPS(60);
     
     std::vector<Ball> balls;
+    balls.reserve(100);
 
     while(!WindowShouldClose()){
         float dt = GetFrameTime();
-        // std::cout << dt << std::endl;
+        Vector2 mouse_pos = GetMousePosition();
+
+
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            balls.push_back(Ball{
-                .pos = GetMousePosition(),
-                .velocity = {
-                    (float)GetRandomValue(-100,100),
-                    (float)GetRandomValue(-100,100)
-                },
-                .radius = 10.0f
-            });
+            balls.push_back(
+                Ball{
+                    mouse_pos.x,
+                    mouse_pos.y,
+                    (float)GetRandomValue(-100,100)*2.0f,
+                    (float)GetRandomValue(-100,100)*2.0f,
+                    10.0f
+                }
+            );
         }
-        for(Ball& b : balls) b.update(dt);
-        // for(Ball& b : balls) std::cout << b;
+
+        // Update Balls
+        for(Ball& b : balls){
+            b.posX += b.velX * dt;
+            b.posY += b.velY * dt;
+
+            if(b.posX - b.radius <= 0.0f){
+                b.velX = -b.velX;
+                b.posX = b.radius;
+            } 
+            if(b.posY - b.radius <= 0.0f){
+                b.velY = -b.velY;
+                b.posY = b.radius;
+            } 
+            if(b.posX + b.radius >= (float)Screen.Width) {
+                b.velX = -b.velX;
+                b.posX = (float)Screen.Width - b.radius;
+            }
+            if(b.posY + b.radius >= (float)Screen.Height){
+                b.velY = -b.velY;
+                b.posY = (float)Screen.Height - b.radius;
+            }
+        }
     
         BeginDrawing();
             ClearBackground(RAYWHITE);
-            for(Ball& b : balls) b.draw();
+
+            // Draw Balls
+            for(Ball& b : balls){
+                DrawCircle(b.posX,b.posY,b.radius,RED);
+            }
+
             DrawFPS(10.0f,10.0f);
         EndDrawing();
     }
