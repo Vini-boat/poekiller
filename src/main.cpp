@@ -4,6 +4,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include <tracy\Tracy.hpp>
+
 struct ScreenConfig{
     int Width = 800;
     int Height = 450;
@@ -57,15 +59,16 @@ auto main() -> int{
     SetTargetFPS(Screen.target_fps);
     
     std::vector<Ball> balls;
-    balls.reserve(100);
+    balls.reserve(10000);
 
     while(!WindowShouldClose()){
+        FrameMark;
         float dt = GetFrameTime();
         Vector2 mouse_pos = GetMousePosition();
 
 
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            for(int i=0;i<10;i++) {
+            for(int i=0;i<100;i++) {
                 addBall(balls,mouse_pos);
             }
         }
@@ -74,6 +77,8 @@ auto main() -> int{
         for(Ball& b : balls){
             b.posX += b.velX * dt;
             b.posY += b.velY * dt;
+
+
 
             if(b.posX - b.radius <= 0.0f){
                 b.velX = -b.velX;

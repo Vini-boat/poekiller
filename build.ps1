@@ -1,22 +1,69 @@
-$cppFiles = Get-ChildItem -Path .\src -Filter *.cpp -Recurse
-
-$srcPaths = $cppFiles.FullName
+# compiler
+$compiler = "g++"
 $outputExe = ".\out\main.exe"
 
-$compiler = "g++"
+$cppVersion = "-std=c++20"
+$optLevel = "-O3"
+
+$warnings = @(
+    "-Wall"
+    "-Wextra"
+    "-Wpedantic"
+    "-Wconversion"
+    "-Wsign-conversion"
+)
+
+$defines = @(
+    "-DTRACY_ENABLE"
+)
+
+$includePaths = @(
+    ".\include"
+    ".\third_party\tracy\public"
+)
+
+$cppFiles = Get-ChildItem .\src -Filter *.cpp -Recurse |
+    Select-Object -ExpandProperty FullName
+
+$srcFiles = @(
+    $cppFiles
+    # ".\third_party\tracy\public\TracyClient.cpp"
+    ".\src\TracyClient.o"
+)
+
+# raylib
+$raylibDeps = @(
+    "-lraylib"
+    "-lopengl32"
+    "-lgdi32"
+    "-lwinmm"
+)
+
+# build command
+
+$includeArgs = $includePaths | ForEach-Object { "-I$_" }
+
+$allArgs = @(
+    $cppVersion
+    $optLevel
+    $warnings
+    $defines
+    "-o"
+    $outputExe
+    $srcFiles
+    $includeArgs
+    $raylibDeps
+)
+
+$cmd = "$compiler $($allArgs -join ' ')"
+
+Write-Host $cmd
+Invoke-Expression $cmd
+
+# clang-tidy
+
 $toolchain = "--gcc-toolchain=C:/msys64/ucrt64/ -target x86_64-w64-mingw32"
-$cpp_version = "-std=c++20"
-$srcPaths | foreach {write-host $_}
-$includePath = ".\include"
-$opt_level = "-O3"
-$warnings = $("-Wall","-Wextra","-Wpedantic","-Wconversion","-Wsign-conversion")
-$raylib_deps = $("-lraylib","-lopengl32","-lgdi32","-lwinmm")
 
-
-$cmd = "$compiler $cpp_version -o $outputExe $srcPaths -I $includePath $opt_level $warnings $raylib_deps"
-$cmd
-invoke-expression $cmd
-
-$cmd = "clang-tidy .\src\*.cpp -- $cpp_version $toolchain"
-$cmd 
-invoke-expression $cmd
+$tidyCmd = "clang-tidy .\src\*.cpp -- $cppVersion $toolchain"
+Write-Host $tidyCmd
+Invoke-Expression $tidyCmd
