@@ -1,0 +1,15 @@
+Checks: >
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  cppcoreguidelines-*,
+
+  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-avoid-const-or-ref-data-members,
+  -cppcoreguidelines-owning-memory,
+  -readability-magic-numbers,
+  -clang-diagnostic-unused-command-line-argument
+
+WarningsAsErrors: >
+  bugprone-*

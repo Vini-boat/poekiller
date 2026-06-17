@@ -4,22 +4,57 @@
 #include "raylib.h"
 #include "raymath.h"
 
-constexpr struct {
+struct ScreenConfig{
     int Width = 800;
     int Height = 450;
-} Screen;
+    int target_fps = 60;
+};
+
+constexpr ScreenConfig Screen{};
+
+struct UiConfig{
+    Color background_color = RAYWHITE;
+    struct {
+        const int x = 10;
+        const int y = 10;
+    } FPS;
+
+    struct {
+        const int x = 10;
+        const int y = 30;
+        const int font_size = 20; 
+        const Color color = GREEN;
+    } BallCount;
+
+};
+constexpr UiConfig Ui{};
 
 struct Ball {
     float posX,posY;
     float velX,velY;
     float radius;
+    static constexpr Color color = RED;
 };
 
-int main(void){
-    std::cout << "Olá" << std::endl;
+auto addBall(std::vector<Ball>& balls, Vector2 pos) -> void{
+    Vector2 vel = Vector2Rotate(
+        {.x=0.0f,.y=100.0f},
+        static_cast<float>(GetRandomValue(0,360))
+    );
+    balls.push_back(
+        Ball{
+            .posX   = pos.x,
+            .posY   = pos.y,
+            .velX   = vel.x,
+            .velY   = vel.y,
+            .radius = 10.0f
+        }
+    );
+}
 
+auto main() -> int{
     InitWindow(Screen.Width, Screen.Height, "Teste");
-    SetTargetFPS(60);
+    SetTargetFPS(Screen.target_fps);
     
     std::vector<Ball> balls;
     balls.reserve(100);
@@ -30,15 +65,9 @@ int main(void){
 
 
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            balls.push_back(
-                Ball{
-                    mouse_pos.x,
-                    mouse_pos.y,
-                    (float)GetRandomValue(-100,100)*2.0f,
-                    (float)GetRandomValue(-100,100)*2.0f,
-                    10.0f
-                }
-            );
+            for(int i=0;i<10;i++) {
+                addBall(balls,mouse_pos);
+            }
         }
 
         // Update Balls
@@ -49,30 +78,42 @@ int main(void){
             if(b.posX - b.radius <= 0.0f){
                 b.velX = -b.velX;
                 b.posX = b.radius;
-            } 
+            }
             if(b.posY - b.radius <= 0.0f){
                 b.velY = -b.velY;
                 b.posY = b.radius;
             } 
-            if(b.posX + b.radius >= (float)Screen.Width) {
+            if(b.posX + b.radius >= static_cast<float>(Screen.Width)) {
                 b.velX = -b.velX;
-                b.posX = (float)Screen.Width - b.radius;
+                b.posX = static_cast<float>(Screen.Width) - b.radius;
             }
-            if(b.posY + b.radius >= (float)Screen.Height){
+            if(b.posY + b.radius >= static_cast<float>(Screen.Height)){
                 b.velY = -b.velY;
-                b.posY = (float)Screen.Height - b.radius;
+                b.posY = static_cast<float>(Screen.Height) - b.radius;
             }
         }
     
         BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(Ui.background_color);
 
             // Draw Balls
             for(Ball& b : balls){
-                DrawCircle(b.posX,b.posY,b.radius,RED);
+                DrawCircle(
+                    static_cast<int>(b.posX),
+                    static_cast<int>(b.posY),
+                    b.radius,
+                    b.color
+                );
             }
 
-            DrawFPS(10.0f,10.0f);
+            DrawFPS(Ui.FPS.x,Ui.FPS.y);
+            DrawText(
+                TextFormat("%d",balls.size()),
+                Ui.BallCount.x,
+                Ui.BallCount.y,
+                Ui.BallCount.font_size,
+                Ui.BallCount.color
+            );
         EndDrawing();
     }
     CloseWindow();
