@@ -42,6 +42,8 @@ $raylibDeps = @(
 # Tracy dependencies (Windows)
 # se precisar buildar
 #  g++ -c third_party/public/TracyClient.cpp -DTRACY_ENABLE -O3 -Ithird_party/public -o out/TracyClient.o
+# o jeito mais fácil é baixar a release compilada e o código fonte da mesma release, pra ter a mesma versão de protocolo
+
 $tracyDeps = @(
     "-ldbghelp"
     "-lws2_32"
