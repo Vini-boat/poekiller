@@ -11,6 +11,7 @@ $warnings = @(
     "-Wpedantic"
     "-Wconversion"
     "-Wsign-conversion"
+    "-isystem third_party/public"
 )
 
 $defines = @(
@@ -19,7 +20,7 @@ $defines = @(
 
 $includePaths = @(
     ".\include"
-    ".\third_party\tracy\public"
+    ".\third_party\public"
 )
 
 $cppFiles = Get-ChildItem .\src -Filter *.cpp -Recurse |
@@ -27,8 +28,7 @@ $cppFiles = Get-ChildItem .\src -Filter *.cpp -Recurse |
 
 $srcFiles = @(
     $cppFiles
-    # ".\third_party\tracy\public\TracyClient.cpp"
-    ".\src\TracyClient.o"
+    ".\out\TracyClient.o"
 )
 
 # raylib
@@ -37,6 +37,15 @@ $raylibDeps = @(
     "-lopengl32"
     "-lgdi32"
     "-lwinmm"
+)
+
+# Tracy dependencies (Windows)
+# se precisar buildar
+#  g++ -c third_party/public/TracyClient.cpp -DTRACY_ENABLE -O3 -Ithird_party/public -o out/TracyClient.o
+$tracyDeps = @(
+    "-ldbghelp"
+    "-lws2_32"
+    "-lsecur32"
 )
 
 # build command
@@ -53,6 +62,7 @@ $allArgs = @(
     $srcFiles
     $includeArgs
     $raylibDeps
+    $tracyDeps
 )
 
 $cmd = "$compiler $($allArgs -join ' ')"
@@ -64,6 +74,6 @@ Invoke-Expression $cmd
 
 $toolchain = "--gcc-toolchain=C:/msys64/ucrt64/ -target x86_64-w64-mingw32"
 
-$tidyCmd = "clang-tidy .\src\*.cpp -- $cppVersion $toolchain"
+$tidyCmd = "clang-tidy .\src\*.cpp --header-filter=`".*src.*`" -- $cppVersion $toolchain $includeArgs"
 Write-Host $tidyCmd
 Invoke-Expression $tidyCmd

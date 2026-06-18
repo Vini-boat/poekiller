@@ -74,7 +74,9 @@ auto main() -> int{
         }
 
         // Update Balls
-        for(Ball& b : balls){
+        {
+            ZoneScopedN("Update Balls");
+            for(Ball& b : balls){
             b.posX += b.velX * dt;
             b.posY += b.velY * dt;
 
@@ -97,18 +99,22 @@ auto main() -> int{
                 b.posY = static_cast<float>(Screen.Height) - b.radius;
             }
         }
+        }
     
         BeginDrawing();
             ClearBackground(Ui.background_color);
 
             // Draw Balls
-            for(Ball& b : balls){
-                DrawCircle(
-                    static_cast<int>(b.posX),
-                    static_cast<int>(b.posY),
-                    b.radius,
-                    b.color
-                );
+            {
+                ZoneScopedN("Draw Balls");
+                for(Ball& b : balls){
+                    DrawCircle(
+                        static_cast<int>(b.posX),
+                        static_cast<int>(b.posY),
+                        b.radius,
+                        b.color
+                    );
+                }
             }
 
             DrawFPS(Ui.FPS.x,Ui.FPS.y);
