@@ -58,6 +58,8 @@ auto main() -> int{
     InitWindow(Screen.Width, Screen.Height, "Teste");
     SetTargetFPS(Screen.target_fps);
     
+    Texture ball_texture = LoadTexture("./assets/bola.png");
+
     std::vector<Ball> balls;
     balls.reserve(10000);
 
@@ -68,7 +70,7 @@ auto main() -> int{
 
 
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-            for(int i=0;i<100;i++) {
+            for(int i=0;i<500;i++) {
                 addBall(balls,mouse_pos);
             }
         }
@@ -77,28 +79,28 @@ auto main() -> int{
         {
             ZoneScopedN("Update Balls");
             for(Ball& b : balls){
-            b.posX += b.velX * dt;
-            b.posY += b.velY * dt;
+                b.posX += b.velX * dt;
+                b.posY += b.velY * dt;
 
 
 
-            if(b.posX - b.radius <= 0.0f){
-                b.velX = -b.velX;
-                b.posX = b.radius;
+                if(b.posX - b.radius <= 0.0f){
+                    b.velX = -b.velX;
+                    b.posX = b.radius;
+                }
+                if(b.posY - b.radius <= 0.0f){
+                    b.velY = -b.velY;
+                    b.posY = b.radius;
+                } 
+                if(b.posX + b.radius >= static_cast<float>(Screen.Width)) {
+                    b.velX = -b.velX;
+                    b.posX = static_cast<float>(Screen.Width) - b.radius;
+                }
+                if(b.posY + b.radius >= static_cast<float>(Screen.Height)){
+                    b.velY = -b.velY;
+                    b.posY = static_cast<float>(Screen.Height) - b.radius;
+                }
             }
-            if(b.posY - b.radius <= 0.0f){
-                b.velY = -b.velY;
-                b.posY = b.radius;
-            } 
-            if(b.posX + b.radius >= static_cast<float>(Screen.Width)) {
-                b.velX = -b.velX;
-                b.posX = static_cast<float>(Screen.Width) - b.radius;
-            }
-            if(b.posY + b.radius >= static_cast<float>(Screen.Height)){
-                b.velY = -b.velY;
-                b.posY = static_cast<float>(Screen.Height) - b.radius;
-            }
-        }
         }
     
         BeginDrawing();
@@ -108,11 +110,11 @@ auto main() -> int{
             {
                 ZoneScopedN("Draw Balls");
                 for(Ball& b : balls){
-                    DrawCircle(
-                        static_cast<int>(b.posX),
-                        static_cast<int>(b.posY),
-                        b.radius,
-                        b.color
+                    DrawTexture(
+                        ball_texture,
+                        static_cast<int>(b.posX -b.radius),
+                        static_cast<int>(b.posY -b.radius),
+                        WHITE
                     );
                 }
             }
